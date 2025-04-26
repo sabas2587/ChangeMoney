@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: directus_db
+    environment:
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: directuspass
+      POSTGRES_DB: directus_db
+    volumes:
+      - directus_pgdata:/var/lib/postgresql/data
+    networks:
+      - directus_net
+  directus:
+    image: directus/directus:latest
+    container_name: directus_app
+    ports:
+      - 8055:8055
+    depends_on:
+      - postgres
+    environment:
+      KEY: mysupersecretkey
+      SECRET: anothersecret
+      ADMIN_EMAIL: admin@caja.com
+      ADMIN_PASSWORD: admin1234
+      DB_CLIENT: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: directus_db
+      DB_USER: directus
+      DB_PASSWORD: directuspass
+
+      # 🚨 Configuración CORS
+      CORS_ENABLED: true
+      CORS_ORIGIN: '*'
+
+    volumes:
+      - directus_uploads:/directus/uploads
+      - directus_extensions:/directus/extensions
+    networks:
+      - directus_net
+
+volumes:
+  directus_pgdata:
+  directus_uploads:
+  directus_extensions:
+
+networks:
+  directus_net:
